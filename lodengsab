@@ -1,4 +1,4 @@
-local Players = game:GetService("Players")
+  local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
 
@@ -6,7 +6,7 @@ local Player = Players.LocalPlayer
 local PlayerGui = Player:WaitForChild("PlayerGui")
 
 -- adjust speed (loading duration)
-local speed = 120 -- 120 seconds = 2 minutes
+local speed = 73 -- 73 seconds = 2 minutes
 local output = 0.05
 
 local ScreenGui = Instance.new("ScreenGui")
