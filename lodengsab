@@ -1,175 +1,284 @@
--- Red Draggable Loader UI with Random Messages
--- Total load time: 1.3 minutes (78 seconds)
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 
-local player = game.Players.LocalPlayer
-local LOAD_TIME = 78
-local speedMultiplier = 1 -- normal speed
+local Player = Players.LocalPlayer
+local PlayerGui = Player:WaitForChild("PlayerGui")
 
-local messages = {
-	"Initializing modules",
-	"Connecting to servers",
-	"Bypassing servers",
-	"Bypassing anti-cheat",
-	"Injecting scripts",
-	"Syncing assets",
-	"Decrypting data",
-	"Validating link",
-	"Hooking functions",
-	"Scanning memory",
-	"Finalizing"
-}
+-- adjust speed (loading duration)
+local speed = 120 -- 120 seconds = 2 minutes
+local output = 0.05
 
--- ScreenGui
-local gui = Instance.new("ScreenGui")
-gui.Name = "RedLoaderUI"
-gui.ResetOnSpawn = false
-gui.Parent = player:WaitForChild("PlayerGui")
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local Creator = Instance.new("TextLabel")
+local StartButton = Instance.new("TextButton")
+local LoadingBarBG = Instance.new("Frame")
+local LoadingBarFill = Instance.new("Frame")
+local StatusLabel = Instance.new("TextLabel")
+local AutoBlockLabel = Instance.new("TextLabel")
+local AntiCooldownLabel = Instance.new("TextLabel")
+local ConsoleLog = Instance.new("ScrollingFrame")
+local ConsoleText = Instance.new("TextLabel")
 
--- Main Frame
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 440, 0, 270)
-frame.Position = UDim2.new(0.5, -220, 0.5, -135)
-frame.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
-frame.BorderSizePixel = 0
-frame.Parent = gui
+ScreenGui.Name = "AutoMoreiraGUI"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-local frameCorner = Instance.new("UICorner")
-frameCorner.CornerRadius = UDim.new(0, 16)
-frameCorner.Parent = frame
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+MainFrame.BackgroundTransparency = 0.15
+MainFrame.BorderSizePixel = 0
+MainFrame.Position = UDim2.new(0.65, 0, 0.25, 0)
+MainFrame.Size = UDim2.new(0, 380, 0, 320)
+MainFrame.Active = true
+MainFrame.Draggable = true
 
--- Title Bar
-local titleBar = Instance.new("Frame")
-titleBar.Size = UDim2.new(1, 0, 0, 36)
-titleBar.BackgroundColor3 = Color3.fromRGB(90, 0, 0)
-titleBar.BorderSizePixel = 0
-titleBar.Parent = frame
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 20)
+UICorner.Parent = MainFrame
 
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 16)
-titleCorner.Parent = titleBar
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Color = Color3.fromRGB(40, 50, 70)
+UIStroke.Thickness = 1
+UIStroke.Transparency = 0.5
+UIStroke.Parent = MainFrame
 
--- Title Text
-local titleText = Instance.new("TextLabel")
-titleText.Size = UDim2.new(1, -10, 1, 0)
-titleText.Position = UDim2.new(0, 10, 0, 0)
-titleText.BackgroundTransparency = 1
-titleText.Text = "    Steal A Brainrot Script"
-titleText.TextXAlignment = Enum.TextXAlignment.Left
-titleText.TextColor3 = Color3.fromRGB(255, 180, 180)
-titleText.Font = Enum.Font.GothamBold
-titleText.TextScaled = true
-titleText.Parent = titleBar
+Title.Name = "Title"
+Title.Parent = MainFrame
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 25, 0, 20)
+Title.Size = UDim2.new(1, -50, 0, 32)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "         YoloScripts Auto Moreira"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 22
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Status Text
-local text = Instance.new("TextLabel")
-text.Size = UDim2.new(1, -20, 0, 90)
-text.Position = UDim2.new(0, 10, 0, 60)
-text.BackgroundTransparency = 1
-text.Text = "Initializing..."
-text.TextColor3 = Color3.fromRGB(255, 255, 255)
-text.Font = Enum.Font.GothamBold
-text.TextWrapped = true
-text.TextScaled = true
-text.Parent = frame
+-- Changed creator text
+Creator.Name = "Creator"
+Creator.Parent = MainFrame
+Creator.BackgroundTransparency = 1
+Creator.Position = UDim2.new(0, 25, 0, 52)
+Creator.Size = UDim2.new(1, -50, 0, 18)
+Creator.Font = Enum.Font.Gotham
+Creator.Text = "                              MADE MY YOLOSCRIPTS"
+Creator.TextColor3 = Color3.fromRGB(130, 140, 160)
+Creator.TextSize = 13
+Creator.TextXAlignment = Enum.TextXAlignment.Left
 
--- Speed Button
-local speedBtn = Instance.new("TextButton")
-speedBtn.Size = UDim2.new(0, 160, 0, 30)
-speedBtn.Position = UDim2.new(0.5, -80, 0, 160)
-speedBtn.BackgroundColor3 = Color3.fromRGB(160, 40, 40)
-speedBtn.Text = "Speed Loading - OFF"
-speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-speedBtn.Font = Enum.Font.GothamBold
-speedBtn.TextScaled = true
-speedBtn.BorderSizePixel = 0
-speedBtn.Parent = frame
+StartButton.Name = "StartButton"
+StartButton.Parent = MainFrame
+StartButton.BackgroundColor3 = Color3.fromRGB(50, 130, 255)
+StartButton.Position = UDim2.new(0, 25, 0, 85)
+StartButton.Size = UDim2.new(1, -50, 0, 45)
+StartButton.Font = Enum.Font.GothamBold
+StartButton.Text = "Start Auto Moreira"
+StartButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+StartButton.TextSize = 16
+StartButton.AutoButtonColor = false
 
-local speedCorner = Instance.new("UICorner")
-speedCorner.CornerRadius = UDim.new(0, 10)
-speedCorner.Parent = speedBtn
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 12)
+ButtonCorner.Parent = StartButton
 
-speedBtn.MouseButton1Click:Connect(function()
-	if speedMultiplier == 1 then
-		speedMultiplier = 1.3
-		speedBtn.Text = "Speed Loading - ON"
-		speedBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
-	else
-		speedMultiplier = 1
-		speedBtn.Text = "Speed Loading? OFF"
-		speedBtn.BackgroundColor3 = Color3.fromRGB(160, 40, 40)
-	end
-end)
+LoadingBarBG.Name = "LoadingBarBG"
+LoadingBarBG.Parent = MainFrame
+LoadingBarBG.BackgroundColor3 = Color3.fromRGB(40, 45, 60)
+LoadingBarBG.BorderSizePixel = 0
+LoadingBarBG.Position = UDim2.new(0, 25, 0, 140)
+LoadingBarBG.Size = UDim2.new(1, -50, 0, 4)
+LoadingBarBG.Visible = false
 
--- Loading Bar BG
-local barBG = Instance.new("Frame")
-barBG.Size = UDim2.new(1, -40, 0, 26)
-barBG.Position = UDim2.new(0, 20, 1, -50)
-barBG.BackgroundColor3 = Color3.fromRGB(70, 0, 0)
-barBG.BorderSizePixel = 0
-barBG.Parent = frame
+local LoadingBGCorner = Instance.new("UICorner")
+LoadingBGCorner.CornerRadius = UDim.new(0, 2)
+LoadingBGCorner.Parent = LoadingBarBG
 
-local barBGCorner = Instance.new("UICorner")
-barBGCorner.CornerRadius = UDim.new(0, 12)
-barBGCorner.Parent = barBG
+LoadingBarFill.Name = "LoadingBarFill"
+LoadingBarFill.Parent = LoadingBarBG
+LoadingBarFill.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
+LoadingBarFill.BorderSizePixel = 0
+LoadingBarFill.Size = UDim2.new(0, 0, 1, 0)
 
--- Loading Bar Fill
-local barFill = Instance.new("Frame")
-barFill.Size = UDim2.new(0, 0, 1, 0)
-barFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
-barFill.BorderSizePixel = 0
-barFill.Parent = barBG
+local LoadingFillCorner = Instance.new("UICorner")
+LoadingFillCorner.CornerRadius = UDim.new(0, 2)
+LoadingFillCorner.Parent = LoadingBarFill
 
-local barFillCorner = Instance.new("UICorner")
-barFillCorner.CornerRadius = UDim.new(0, 12)
-barFillCorner.Parent = barFill
+StatusLabel.Name = "StatusLabel"
+StatusLabel.Parent = MainFrame
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Position = UDim2.new(0, 25, 0, 155)
+StatusLabel.Size = UDim2.new(1, -50, 0, 20)
+StatusLabel.Font = Enum.Font.Gotham
+StatusLabel.Text = "Ready to start..."
+StatusLabel.TextColor3 = Color3.fromRGB(160, 170, 190)
+StatusLabel.TextSize = 13
+StatusLabel.TextXAlignment = Enum.TextXAlignment.Center
 
--- DRAGGING
-local UIS = game:GetService("UserInputService")
-local dragging, dragStart, startPos
+AutoBlockLabel.Name = "AutoBlockLabel"
+AutoBlockLabel.Parent = MainFrame
+AutoBlockLabel.BackgroundTransparency = 1
+AutoBlockLabel.Position = UDim2.new(0, 25, 0, 185)
+AutoBlockLabel.Size = UDim2.new(1, -50, 0, 22)
+AutoBlockLabel.Font = Enum.Font.GothamBold
+AutoBlockLabel.Text = "Auto Block: ON"
+AutoBlockLabel.TextColor3 = Color3.fromRGB(100, 255, 150)
+AutoBlockLabel.TextSize = 14
+AutoBlockLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-titleBar.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = true
-		dragStart = input.Position
-		startPos = frame.Position
-	end
-end)
+AntiCooldownLabel.Name = "AntiCooldownLabel"
+AntiCooldownLabel.Parent = MainFrame
+AntiCooldownLabel.BackgroundTransparency = 1
+AntiCooldownLabel.Position = UDim2.new(0, 25, 0, 212)
+AntiCooldownLabel.Size = UDim2.new(1, -50, 0, 22)
+AntiCooldownLabel.Font = Enum.Font.GothamBold
+AntiCooldownLabel.Text = "Anti Cooldown (Soon)"
+AntiCooldownLabel.TextColor3 = Color3.fromRGB(200, 120, 255)
+AntiCooldownLabel.TextSize = 14
+AntiCooldownLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-UIS.InputChanged:Connect(function(input)
-	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-		local delta = input.Position - dragStart
-		frame.Position = UDim2.new(
-			startPos.X.Scale,
-			startPos.X.Offset + delta.X,
-			startPos.Y.Scale,
-			startPos.Y.Offset + delta.Y
-		)
-	end
-end)
+ConsoleLog.Name = "ConsoleLog"
+ConsoleLog.Parent = MainFrame
+ConsoleLog.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ConsoleLog.BackgroundTransparency = 0.6
+ConsoleLog.BorderSizePixel = 0
+ConsoleLog.Position = UDim2.new(0, 25, 0, 245)
+ConsoleLog.Size = UDim2.new(1, -50, 0, 60)
+ConsoleLog.CanvasSize = UDim2.new(0, 0, 0, 0)
+ConsoleLog.ScrollBarThickness = 0
+ConsoleLog.ScrollingEnabled = false
+ConsoleLog.ClipsDescendants = true
 
-UIS.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 then
-		dragging = false
-	end
-end)
+local LogCorner = Instance.new("UICorner")
+LogCorner.CornerRadius = UDim.new(0, 10)
+LogCorner.Parent = ConsoleLog
 
--- Random message changer
-task.spawn(function()
-	while text.Text ~= "Invalid Link!" do
-		text.Text = messages[math.random(1, #messages)] .. "..."
-		task.wait(math.random(2, 4) / speedMultiplier)
-	end
-end)
+ConsoleText.Name = "ConsoleText"
+ConsoleText.Parent = ConsoleLog
+ConsoleText.BackgroundTransparency = 1
+ConsoleText.Position = UDim2.new(0, 8, 0, 5)
+ConsoleText.Size = UDim2.new(1, -16, 0, 0)
+ConsoleText.Font = Enum.Font.Code
+ConsoleText.Text = ""
+ConsoleText.TextColor3 = Color3.fromRGB(200, 210, 220)
+ConsoleText.TextSize = 11
+ConsoleText.TextXAlignment = Enum.TextXAlignment.Left
+ConsoleText.TextYAlignment = Enum.TextYAlignment.Top
+ConsoleText.RichText = true
 
--- Fill bar over time (affected by speed)
-local steps = 300
-local baseStepWait = LOAD_TIME / steps
+local IsRunning = false
+local IsLoading = false
+local LogMessages = {}
+local SuccessCount = 0
+local FailedCount = 0
 
-for i = 1, steps do
-	barFill.Size = UDim2.new(i / steps, 0, 1, 0)
-	task.wait(baseStepWait / speedMultiplier)
+local function AddLog(message, color)
+    table.insert(LogMessages, {text = message, color = color or Color3.fromRGB(100, 255, 150)})
+    
+    local visibleMessages = {}
+    local startIndex = math.max(1, #LogMessages - 3)
+    
+    for i = startIndex, #LogMessages do
+        table.insert(visibleMessages, LogMessages[i])
+    end
+    
+    local logText = ""
+    for i, log in ipairs(visibleMessages) do
+        local r, g, b = math.floor(log.color.R * 255), math.floor(log.color.G * 255), math.floor(log.color.B * 255)
+        logText = logText .. string.format('<font color="rgb(%d,%d,%d)">%s</font>\n', r, g, b, log.text)
+    end
+    
+    ConsoleText.Text = logText
 end
 
--- End state
-text.Text = "Invalid Link!"
-text.TextColor3 = Color3.fromRGB(255, 90, 90)
+local function AnimateLoadingBar()
+    IsLoading = true
+    LoadingBarBG.Visible = true
+    LoadingBarFill.Size = UDim2.new(0, 0, 1, 0)
+    
+    local loadTween = TweenService:Create(
+        LoadingBarFill,
+        TweenInfo.new(speed, Enum.EasingStyle.Linear),
+        {Size = UDim2.new(1, 0, 1, 0)}
+    )
+    loadTween:Play()
+    
+    task.wait(speed)
+    IsLoading = false
+end
+
+local function StartScript()
+    if IsRunning then return end
+    
+    IsRunning = true
+    SuccessCount = 0
+    FailedCount = 0
+    StatusLabel.Text = "Connecting..."
+    
+    task.spawn(AnimateLoadingBar)
+    
+    task.spawn(function()
+        while IsLoading and IsRunning do
+            local rand = math.random(1, 100)
+            
+            if rand <= 60 then
+                SuccessCount = SuccessCount + 1
+                AddLog("Successfully sent to a server!", Color3.fromRGB(100, 255, 150))
+            else
+                FailedCount = FailedCount + 1
+                AddLog("Failed to send to a server [Bad gateway 540:210]", Color3.fromRGB(255, 90, 90))
+            end
+            
+            task.wait(output)
+        end
+        
+        if IsRunning then
+            task.wait(0.3)
+            AddLog("Success (" .. SuccessCount .. ") Failed (" .. FailedCount .. ")", Color3.fromRGB(120, 180, 255))
+            task.wait(0.5)
+            AddLog("Waiting for Player to join...", Color3.fromRGB(200, 200, 100))
+            
+            task.wait(math.random(2, 5))
+            
+            if IsRunning then
+                AddLog("Player Joined!", Color3.fromRGB(100, 255, 150))
+                StatusLabel.Text = "Successful"
+            end
+        end
+    end)
+end
+
+local function StopScript()
+    IsRunning = false
+    IsLoading = false
+    StartButton.Text = "Start Auto Moreira"
+    StartButton.BackgroundColor3 = Color3.fromRGB(50, 130, 255)
+    StatusLabel.Text = "Stopped"
+    LoadingBarBG.Visible = false
+    AddLog("Script stopped by user", Color3.fromRGB(255, 90, 90))
+end
+
+StartButton.MouseEnter:Connect(function()
+    if not IsRunning and not IsLoading then
+        TweenService:Create(StartButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(60, 145, 255)}):Play()
+    end
+end)
+
+StartButton.MouseLeave:Connect(function()
+    if not IsRunning and not IsLoading then
+        TweenService:Create(StartButton, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 130, 255)}):Play()
+    end
+end)
+
+StartButton.MouseButton1Click:Connect(function()
+    if not IsRunning then
+        StartButton.BackgroundColor3 = Color3.fromRGB(255, 200, 70)
+        StartButton.Text = "Starting..."
+        StartScript()
+    else
+        StopScript()
+    end
+end)
