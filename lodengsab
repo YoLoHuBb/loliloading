@@ -1,0 +1,175 @@
+-- Red Draggable Loader UI with Random Messages
+-- Total load time: 1.3 minutes (78 seconds)
+
+local player = game.Players.LocalPlayer
+local LOAD_TIME = 78
+local speedMultiplier = 1 -- normal speed
+
+local messages = {
+	"Initializing modules",
+	"Connecting to servers",
+	"Bypassing servers",
+	"Bypassing anti-cheat",
+	"Injecting scripts",
+	"Syncing assets",
+	"Decrypting data",
+	"Validating link",
+	"Hooking functions",
+	"Scanning memory",
+	"Finalizing"
+}
+
+-- ScreenGui
+local gui = Instance.new("ScreenGui")
+gui.Name = "RedLoaderUI"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Main Frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 440, 0, 270)
+frame.Position = UDim2.new(0.5, -220, 0.5, -135)
+frame.BackgroundColor3 = Color3.fromRGB(120, 0, 0)
+frame.BorderSizePixel = 0
+frame.Parent = gui
+
+local frameCorner = Instance.new("UICorner")
+frameCorner.CornerRadius = UDim.new(0, 16)
+frameCorner.Parent = frame
+
+-- Title Bar
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 36)
+titleBar.BackgroundColor3 = Color3.fromRGB(90, 0, 0)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = frame
+
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 16)
+titleCorner.Parent = titleBar
+
+-- Title Text
+local titleText = Instance.new("TextLabel")
+titleText.Size = UDim2.new(1, -10, 1, 0)
+titleText.Position = UDim2.new(0, 10, 0, 0)
+titleText.BackgroundTransparency = 1
+titleText.Text = "    Steal A Brainrot Script"
+titleText.TextXAlignment = Enum.TextXAlignment.Left
+titleText.TextColor3 = Color3.fromRGB(255, 180, 180)
+titleText.Font = Enum.Font.GothamBold
+titleText.TextScaled = true
+titleText.Parent = titleBar
+
+-- Status Text
+local text = Instance.new("TextLabel")
+text.Size = UDim2.new(1, -20, 0, 90)
+text.Position = UDim2.new(0, 10, 0, 60)
+text.BackgroundTransparency = 1
+text.Text = "Initializing..."
+text.TextColor3 = Color3.fromRGB(255, 255, 255)
+text.Font = Enum.Font.GothamBold
+text.TextWrapped = true
+text.TextScaled = true
+text.Parent = frame
+
+-- Speed Button
+local speedBtn = Instance.new("TextButton")
+speedBtn.Size = UDim2.new(0, 160, 0, 30)
+speedBtn.Position = UDim2.new(0.5, -80, 0, 160)
+speedBtn.BackgroundColor3 = Color3.fromRGB(160, 40, 40)
+speedBtn.Text = "Speed Loading - OFF"
+speedBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+speedBtn.Font = Enum.Font.GothamBold
+speedBtn.TextScaled = true
+speedBtn.BorderSizePixel = 0
+speedBtn.Parent = frame
+
+local speedCorner = Instance.new("UICorner")
+speedCorner.CornerRadius = UDim.new(0, 10)
+speedCorner.Parent = speedBtn
+
+speedBtn.MouseButton1Click:Connect(function()
+	if speedMultiplier == 1 then
+		speedMultiplier = 1.3
+		speedBtn.Text = "Speed Loading - ON"
+		speedBtn.BackgroundColor3 = Color3.fromRGB(200, 60, 60)
+	else
+		speedMultiplier = 1
+		speedBtn.Text = "Speed Loading? OFF"
+		speedBtn.BackgroundColor3 = Color3.fromRGB(160, 40, 40)
+	end
+end)
+
+-- Loading Bar BG
+local barBG = Instance.new("Frame")
+barBG.Size = UDim2.new(1, -40, 0, 26)
+barBG.Position = UDim2.new(0, 20, 1, -50)
+barBG.BackgroundColor3 = Color3.fromRGB(70, 0, 0)
+barBG.BorderSizePixel = 0
+barBG.Parent = frame
+
+local barBGCorner = Instance.new("UICorner")
+barBGCorner.CornerRadius = UDim.new(0, 12)
+barBGCorner.Parent = barBG
+
+-- Loading Bar Fill
+local barFill = Instance.new("Frame")
+barFill.Size = UDim2.new(0, 0, 1, 0)
+barFill.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+barFill.BorderSizePixel = 0
+barFill.Parent = barBG
+
+local barFillCorner = Instance.new("UICorner")
+barFillCorner.CornerRadius = UDim.new(0, 12)
+barFillCorner.Parent = barFill
+
+-- DRAGGING
+local UIS = game:GetService("UserInputService")
+local dragging, dragStart, startPos
+
+titleBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+-- Random message changer
+task.spawn(function()
+	while text.Text ~= "Invalid Link!" do
+		text.Text = messages[math.random(1, #messages)] .. "..."
+		task.wait(math.random(2, 4) / speedMultiplier)
+	end
+end)
+
+-- Fill bar over time (affected by speed)
+local steps = 300
+local baseStepWait = LOAD_TIME / steps
+
+for i = 1, steps do
+	barFill.Size = UDim2.new(i / steps, 0, 1, 0)
+	task.wait(baseStepWait / speedMultiplier)
+end
+
+-- End state
+text.Text = "Invalid Link!"
+text.TextColor3 = Color3.fromRGB(255, 90, 90)
